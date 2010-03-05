@@ -1,0 +1,4 @@
+Start the websocket server using
+  ruby run.rb
+
+Visit the page index.html in more than one browser window and draw away
