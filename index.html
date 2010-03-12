@@ -28,9 +28,14 @@
         
         relativeCoords: function(event){
           return {
-            x: event.pageX - this.offset.x,
-            y: event.pageY - this.offset.y
+            x: event.pageX - this.offset().x,
+            y: event.pageY - this.offset().y
           };
+        },
+        
+        offset: function(){
+          var offset = this.jelem.offset();
+          return {x: offset.left, y: offset.top};
         },
         
         drawTo: function(x, y){
@@ -40,7 +45,6 @@
           this.context.stroke();
           this.current.x = x;
           this.current.y = y;
-          this.context.closePath();
           websocket.send([x, y]);
         },
         
@@ -48,8 +52,6 @@
           var obj = this;
           this.mouse_down = false;
           this.context = this.elem.getContext('2d');
-          var offset = this.jelem.offset();
-          this.offset = {x: offset.left, y: offset.top};
           this.current = {x: 0, y: 0};
 
           this.jelem.mousedown(function(event){
