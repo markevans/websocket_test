@@ -17,7 +17,7 @@
       };
       websocket.onmessage = function(event){
         var coords = event.data.split(',');
-        $('canvas')[0].obj.drawTo(coords[0], coords[1]);
+        $('canvas')[0].obj.draw(coords[0], coords[1], false);
       };
       websocket.onclose = function(){
         send('I am disconnecting');
@@ -38,14 +38,16 @@
           return {x: offset.left, y: offset.top};
         },
         
-        drawTo: function(x, y){
+        draw: function(x, y, send_message){
           this.context.beginPath();
+          // this.context.arc(x, y, 1, 0, 2*Math.PI, true);
+          // this.context.fill();
           this.context.moveTo(this.current.x, this.current.y);
           this.context.lineTo(x, y);
           this.context.stroke();
           this.current.x = x;
           this.current.y = y;
-          websocket.send([x, y]);
+          if(send_message) websocket.send([x, y]);
         },
         
         init: function(){
@@ -65,7 +67,7 @@
           mousemove(function(event){
             if(obj.mouse_down){
               var relative_coords = obj.relativeCoords(event);
-              obj.drawTo(relative_coords.x, relative_coords.y);
+              obj.draw(relative_coords.x, relative_coords.y, true);
             }
           });
           

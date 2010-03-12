@@ -42,7 +42,9 @@ class WebsocketController < Cramp::Controller::Websocket
   end
 
   def received_data(data)
-    Connection.all.each{|ws| ws.render(data) unless ws == self }
+    Connection.all.each do |ws|
+      ws.render(data) unless ws == self
+    end
   end
   
 end
