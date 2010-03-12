@@ -16,8 +16,8 @@
         console.log('Connected');
       };
       websocket.onmessage = function(event){
-        var coords = event.data.split(',');
-        $('canvas')[0].obj.draw(coords[0], coords[1], false);
+        var response = JSON.parse(event.data);
+        $().trigger('ws.'+response.name, [response.content]);
       };
       websocket.onclose = function(){
         send('I am disconnecting');
@@ -47,7 +47,30 @@
           this.context.stroke();
           this.current.x = x;
           this.current.y = y;
-          if(send_message) websocket.send([x, y]);
+          this.send('draw', [x, y]);
+        },
+        
+        onMouseDown: function(x, y, send_message){
+          this.mouse_down = true;
+          this.current = {x: x, y: y};
+          this.send('mousedown', [x, y]);
+        },
+        
+        onMouseUp: function(send_message){
+          this.mouse_down = false;
+          this.send('mouseup');
+        },
+        
+        send: function(name, content){
+          if(!this.suppress_messages){
+            websocket.send(JSON.stringify({name: name, content: content}));
+          }
+        },
+        
+        withoutTransmitting: function(func){
+          this.suppress_messages = true;
+          func();
+          this.suppress_messages = false;
         },
         
         init: function(){
@@ -57,18 +80,32 @@
           this.current = {x: 0, y: 0};
 
           this.jelem.mousedown(function(event){
-            obj.mouse_down = true;
-            obj.current = obj.relativeCoords(event);
+            var coords = obj.relativeCoords(event);
+            obj.onMouseDown(coords.x, coords.y);
           }).
           mouseup(function(){
-            obj.mouse_down = false;
-            // obj.current = {x: 0, y: 0};
+            obj.onMouseUp();
           }).
           mousemove(function(event){
             if(obj.mouse_down){
               var relative_coords = obj.relativeCoords(event);
-              obj.draw(relative_coords.x, relative_coords.y, true);
+              obj.draw(relative_coords.x, relative_coords.y);
             }
+          });
+          
+          // Respond to websocket events
+          $().bind('ws.draw', function(evt, coords){
+            obj.withoutTransmitting(function(){
+              obj.draw(coords[0], coords[1]);
+            });
+          }).bind('ws.mousedown', function(evt, coords){
+            obj.withoutTransmitting(function(){
+              obj.onMouseDown(coords[0], coords[1]);
+            });
+          }).bind('ws.mouseup', function(evt){
+            obj.withoutTransmitting(function(){
+              obj.onMouseUp();
+            });
           });
           
         }
