@@ -2,7 +2,7 @@ require 'rubygems'
 require 'cramp/controller'
 require 'connection'
 
-class WebsocketController < Cramp::Controller::Websocket
+class CometController < Cramp::Controller::Action
   
   on_start :add_connection
   on_finish :remove_connection
@@ -25,4 +25,4 @@ class WebsocketController < Cramp::Controller::Websocket
   
 end
 
-Rack::Handler::Thin.run WebsocketController, :Port => 3001
+Rack::Handler::Thin.run WebsocketController, :Port => 3002

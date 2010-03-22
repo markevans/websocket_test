@@ -5,112 +5,22 @@
 
   <script type="text/javascript" src="jquery-1.3.2.min.js" ></script>
   <script type="text/javascript" src="jquery.objectify.js" ></script>
-  <script type="text/javascript" charset="utf-8">
+  <script type="text/javascript" src="lib.js" ></script>
+  <script type="text/javascript">
     var websocket;
     
     // WEBSOCKET STUFF
     $(function(){
 
-      websocket = new WebSocket('ws://localhost:3001');
-      websocket.onopen = function(){
-        console.log('Connected');
-      };
-      websocket.onmessage = function(event){
-        var response = JSON.parse(event.data);
-        $().trigger('ws.'+response.name, [response.content]);
-      };
-      websocket.onclose = function(){
-        send('I am disconnecting');
-        console.log('Disconnected');
-      };
-    
-      $.objectify('drawingCanvas',{
-        
-        relativeCoords: function(event){
-          return {
-            x: event.pageX - this.offset().x,
-            y: event.pageY - this.offset().y
-          };
-        },
-        
-        offset: function(){
-          var offset = this.jelem.offset();
-          return {x: offset.left, y: offset.top};
-        },
-        
-        draw: function(x, y, send_message){
-          this.context.beginPath();
-          // this.context.arc(x, y, 1, 0, 2*Math.PI, true);
-          // this.context.fill();
-          this.context.moveTo(this.current.x, this.current.y);
-          this.context.lineTo(x, y);
-          this.context.stroke();
-          this.current.x = x;
-          this.current.y = y;
-          this.send('draw', [x, y]);
-        },
-        
-        onMouseDown: function(x, y, send_message){
-          this.mouse_down = true;
-          this.current = {x: x, y: y};
-          this.send('mousedown', [x, y]);
-        },
-        
-        onMouseUp: function(send_message){
-          this.mouse_down = false;
-          this.send('mouseup');
-        },
-        
-        send: function(name, content){
-          if(!this.suppress_messages){
-            websocket.send(JSON.stringify({name: name, content: content}));
-          }
-        },
-        
-        withoutTransmitting: function(func){
-          this.suppress_messages = true;
-          func();
-          this.suppress_messages = false;
-        },
-        
-        init: function(){
-          var obj = this;
-          this.mouse_down = false;
-          this.context = this.elem.getContext('2d');
-          this.current = {x: 0, y: 0};
-
-          this.jelem.mousedown(function(event){
-            var coords = obj.relativeCoords(event);
-            obj.onMouseDown(coords.x, coords.y);
-          }).
-          mouseup(function(){
-            obj.onMouseUp();
-          }).
-          mousemove(function(event){
-            if(obj.mouse_down){
-              var relative_coords = obj.relativeCoords(event);
-              obj.draw(relative_coords.x, relative_coords.y);
-            }
-          });
-          
-          // Respond to websocket events
-          $().bind('ws.draw', function(evt, coords){
-            obj.withoutTransmitting(function(){
-              obj.draw(coords[0], coords[1]);
-            });
-          }).bind('ws.mousedown', function(evt, coords){
-            obj.withoutTransmitting(function(){
-              obj.onMouseDown(coords[0], coords[1]);
-            });
-          }).bind('ws.mouseup', function(evt){
-            obj.withoutTransmitting(function(){
-              obj.onMouseUp();
-            });
-          });
-          
+      $.comet('http://localhost:3002',
+        // Success
+        function(data){
+          console.log(data);
+          // var response = JSON.parse(event.data);
+          // $().trigger('dc.'+response.name, [response.content]);
         }
-      });
-      
+      );
+
       a = $('canvas').drawingCanvas()[0].obj;
 
     });
