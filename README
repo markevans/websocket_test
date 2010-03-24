@@ -1,10 +1,5 @@
 Start the websocket server using
-  ruby websocket_server.rb
+  ruby server.rb
 
-Visit the page draw_websocket.html in more than one browser window and draw away
-
-Start the long-polling comet server using
-  ruby comet_server.rb
-
-Visit draw_comet.html to draw.
+Visit the page index.html in more than one browser window and draw away
  
