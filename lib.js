@@ -1,24 +1,5 @@
 (function($){
 
-// Comet stuff for long-polling
-$.comet = function(url, success_callback, error_callback){
-  error_callback = error_callback || function(a,b,c){alert('Error '+b)};
-  $.ajax({
-    type: "GET",
-    dataType: 'json',
-    url: url,
-    success: function(data){
-      success_callback(data);
-      $.comet(url, success_callback, error_callback);
-    },
-    error: function(a,b,c){
-      error_callback(a,b,c);
-      $.comet(url, success_callback, error_callback);
-    },
-    ifModified: true
-  });
-}
-
 // Drawing Canvas
 $.objectify('drawingCanvas',{
   
